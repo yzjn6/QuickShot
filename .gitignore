@@ -1,0 +1,9 @@
+/QuickShot.exe
+*.pdb
+*.cache
+.vs/
+*.user
+*.suo
+_temp_/
+/docs/
+/_local_/
