@@ -183,98 +183,110 @@ namespace QuickShot
             int w = Math.Min(160, vs.Width - 20);
             int h = Math.Min(90, vs.Height - 20);
             Bitmap screen = new Bitmap(vs.Width, vs.Height, PixelFormat.Format32bppArgb);
-            using (Graphics g = Graphics.FromImage(screen))
-            {
-                g.CopyFromScreen(vs.Left, vs.Top, 0, 0, screen.Size);
-            }
-
             Bitmap bmp = new Bitmap(w, h, PixelFormat.Format32bppArgb);
-            using (Graphics g = Graphics.FromImage(bmp))
-            {
-                g.DrawImage(screen, new Rectangle(0, 0, w, h),
-                    new Rectangle(10, 10, w, h), GraphicsUnit.Pixel);
-                g.DrawRectangle(new Pen(Color.Red, 3), 2, 2, w - 5, h - 5);
-            }
-
-            bool ok = ClipboardImage.Set(bmp);
-
-            string render;
+            int code;
             try
             {
-                PaintContext ctx = new PaintContext { Screen = screen, Vs = vs, Scale = 1f };
-
-                ShapeLine line = new ShapeLine { Color = Color.Blue, BrushWidth = 4, SemiTransparent = true };
-                line.AddPoint(new Point(90, 60));
-                line.AddPoint(new Point(120, 80));
-                line.AddPoint(new Point(150, 70));
-
-                ShapeMosaic mosaicRect = new ShapeMosaic
+                using (Graphics g = Graphics.FromImage(screen))
                 {
-                    RectMode = true,
-                    RectStart = new Point(20, 60),
-                    RectEnd = new Point(70, 90)
-                };
-
-                ShapeMosaic mosaicBrush = new ShapeMosaic { RectMode = false, BrushWidth = 32 };
-                mosaicBrush.AddPoint(new Point(30, 20));
-                mosaicBrush.AddPoint(new Point(60, 40));
-
-                ShapeEraser eraser = new ShapeEraser
-                {
-                    RectMode = true,
-                    RectStart = new Point(100, 20),
-                    RectEnd = new Point(140, 40)
-                };
-
-                ShapeBase[] arr = new ShapeBase[]
-                {
-                    new ShapeRect { Start = new Point(5, 5), End = new Point(60, 40), Color = Color.Red, StrokeWidth = 3, Filled = false },
-                    new ShapeEllipse { Start = new Point(70, 5), End = new Point(120, 40), Color = Color.Green, StrokeWidth = 8, Filled = true },
-                    new ShapeArrow { Start = new Point(5, 50), End = new Point(80, 100), Color = Color.Blue, ArrowSize = 18, Filled = true },
-                    new ShapeNumber { Center = new Point(150, 20), Radius = 16, Value = 3, Color = Color.Orange, Filled = true },
-                    new ShapeText { Position = new Point(5, 95), Text = "测试", FontSize = 26, Bold = true, Color = Color.Purple },
-                    line, mosaicRect, mosaicBrush, eraser
-                };
-
-                using (Bitmap t = new Bitmap(200, 130))
-                using (Graphics tg = Graphics.FromImage(t))
-                {
-                    foreach (ShapeBase s in arr)
-                    {
-                        s.Commit(ctx);
-                        s.Paint(tg, ctx);
-                    }
-                    new ShapeEraser { RectMode = true, RectStart = new Point(10, 10), RectEnd = new Point(50, 30) }.Paint(tg, ctx);
-                    ShapeEraser eraserBrushPreview = new ShapeEraser { RectMode = false, BrushWidth = 32 };
-                    eraserBrushPreview.AddPoint(new Point(60, 60));
-                    eraserBrushPreview.AddPoint(new Point(90, 70));
-                    eraserBrushPreview.Paint(tg, ctx);
+                    g.CopyFromScreen(vs.Left, vs.Top, 0, 0, screen.Size);
                 }
-                render = "ok";
+
+                using (Graphics g = Graphics.FromImage(bmp))
+                {
+                    g.DrawImage(screen, new Rectangle(0, 0, w, h),
+                        new Rectangle(10, 10, w, h), GraphicsUnit.Pixel);
+                    using (Pen p = new Pen(Color.Red, 3))
+                    {
+                        g.DrawRectangle(p, 2, 2, w - 5, h - 5);
+                    }
+                }
+
+                bool ok = ClipboardImage.Set(bmp);
+
+                string render;
+                try
+                {
+                    PaintContext ctx = new PaintContext { Screen = screen, Vs = vs, Scale = 1f };
+
+                    ShapeLine line = new ShapeLine { Color = Color.Blue, BrushWidth = 4, SemiTransparent = true };
+                    line.AddPoint(new Point(90, 60));
+                    line.AddPoint(new Point(120, 80));
+                    line.AddPoint(new Point(150, 70));
+
+                    ShapeMosaic mosaicRect = new ShapeMosaic
+                    {
+                        RectMode = true,
+                        RectStart = new Point(20, 60),
+                        RectEnd = new Point(70, 90)
+                    };
+
+                    ShapeMosaic mosaicBrush = new ShapeMosaic { RectMode = false, BrushWidth = 32 };
+                    mosaicBrush.AddPoint(new Point(30, 20));
+                    mosaicBrush.AddPoint(new Point(60, 40));
+
+                    ShapeEraser eraser = new ShapeEraser
+                    {
+                        RectMode = true,
+                        RectStart = new Point(100, 20),
+                        RectEnd = new Point(140, 40)
+                    };
+
+                    ShapeBase[] arr = new ShapeBase[]
+                    {
+                        new ShapeRect { Start = new Point(5, 5), End = new Point(60, 40), Color = Color.Red, StrokeWidth = 3, Filled = false },
+                        new ShapeEllipse { Start = new Point(70, 5), End = new Point(120, 40), Color = Color.Green, StrokeWidth = 8, Filled = true },
+                        new ShapeArrow { Start = new Point(5, 50), End = new Point(80, 100), Color = Color.Blue, ArrowSize = 18, Filled = true },
+                        new ShapeNumber { Center = new Point(150, 20), Radius = 16, Value = 3, Color = Color.Orange, Filled = true },
+                        new ShapeText { Position = new Point(5, 95), Text = "测试", FontSize = 26, Bold = true, Color = Color.Purple },
+                        line, mosaicRect, mosaicBrush, eraser
+                    };
+
+                    using (Bitmap t = new Bitmap(200, 130))
+                    using (Graphics tg = Graphics.FromImage(t))
+                    {
+                        foreach (ShapeBase s in arr)
+                        {
+                            s.Commit(ctx);
+                            s.Paint(tg, ctx);
+                        }
+                        new ShapeEraser { RectMode = true, RectStart = new Point(10, 10), RectEnd = new Point(50, 30) }.Paint(tg, ctx);
+                        ShapeEraser eraserBrushPreview = new ShapeEraser { RectMode = false, BrushWidth = 32 };
+                        eraserBrushPreview.AddPoint(new Point(60, 60));
+                        eraserBrushPreview.AddPoint(new Point(90, 70));
+                        eraserBrushPreview.Paint(tg, ctx);
+                    }
+                    render = "ok";
+                }
+                catch (Exception ex)
+                {
+                    render = "fail:" + ex.Message;
+                }
+
+                if (render == "ok")
+                {
+                    try { render = RunHitAssertions(); }
+                    catch (Exception ex) { render = "fail:" + ex.Message; }
+                }
+
+                if (render == "ok")
+                {
+                    try { render = RunGeometryAssertions(); }
+                    catch (Exception ex) { render = "fail:" + ex.Message; }
+                }
+
+                if (render == "ok") render = RunControlSmoke();
+
+                Console.WriteLine("selftest size=" + w + "x" + h + " clipboard=" + ok + " render=" + render +
+                                  " boot=" + boot.ElapsedMilliseconds + "ms");
+                code = ok ? 0 : 2;
+                if (render != "ok") code = 3;
             }
-            catch (Exception ex)
+            finally
             {
-                render = "fail:" + ex.Message;
+                bmp.Dispose();
+                screen.Dispose();
             }
-
-            if (render == "ok")
-            {
-                try { render = RunHitAssertions(); }
-                catch (Exception ex) { render = "fail:" + ex.Message; }
-            }
-
-            if (render == "ok")
-            {
-                try { render = RunGeometryAssertions(); }
-                catch (Exception ex) { render = "fail:" + ex.Message; }
-            }
-
-            if (render == "ok") render = RunControlSmoke();
-
-            Console.WriteLine("selftest size=" + w + "x" + h + " clipboard=" + ok + " render=" + render +
-                              " boot=" + boot.ElapsedMilliseconds + "ms");
-            int code = ok ? 0 : 2;
-            if (render != "ok") code = 3;
             Environment.Exit(code);
         }
     }

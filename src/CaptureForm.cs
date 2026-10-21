@@ -547,6 +547,7 @@ namespace QuickShot
                 _drawing.Commit(_ctx);
                 if (_drawing.IsEmpty())
                 {
+                    _drawing.DisposeResources();
                     _drawing = null;
                 }
                 else
@@ -644,7 +645,7 @@ namespace QuickShot
             if (e.KeyCode == Keys.Escape)
             {
                 if (_textBox != null) return;
-                if (_drawing != null) { _drawing = null; Invalidate(); return; }
+                if (_drawing != null) { _drawing.DisposeResources(); _drawing = null; Invalidate(); return; }
                 if (CanFallBackToDrag()) { EnterDragMode(); Invalidate(); return; }
                 if (_selected) { BackToViewing(); return; }
                 Quit();
@@ -750,7 +751,11 @@ namespace QuickShot
         {
             for (int i = _shapes.Count - 1; i >= 0; i--)
             {
-                if (_shapes[i].Undone) _shapes.RemoveAt(i);
+                if (_shapes[i].Undone)
+                {
+                    _shapes[i].DisposeResources();
+                    _shapes.RemoveAt(i);
+                }
                 else break;
             }
         }
@@ -1330,6 +1335,8 @@ namespace QuickShot
 
         protected override void Dispose(bool disposing)
         {
+            Font textFont = _textFont;
+            _textFont = null;
             if (disposing)
             {
                 ShapeBase lastDrawing = _drawing;
@@ -1346,7 +1353,6 @@ namespace QuickShot
                     lastActive.DisposeResources();
                 }
 
-                if (_textFont != null) _textFont.Dispose();
                 if (_screen != null) _screen.Dispose();
                 if (_brushDim != null) _brushDim.Dispose();
                 if (_brushSizeBg != null) _brushSizeBg.Dispose();
@@ -1362,6 +1368,7 @@ namespace QuickShot
                 if (_fontPix != null) _fontPix.Dispose();
             }
             base.Dispose(disposing);
+            if (textFont != null) textFont.Dispose();
         }
     }
 }
